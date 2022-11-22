@@ -231,7 +231,7 @@ async def activity(interaction: discord.Interaction, member: Optional[discord.Me
         songurl = []
         thumb = []
 
-        # Please don't ask anything...
+        # Please don't ask anything... 😶‍🌫️
         if str(da_activity.name) == "Spotify":
             songurl = f"https://open.spotify.com/track/{da_activity.track_id}"
             thumb = "https://cdn-icons.flaticon.com/png/512/2585/premium/2585161.png?token=exp=1661109514~hmac=0e40686fc50875d90b3e5d4edaf4d271"
@@ -256,7 +256,7 @@ async def activity(interaction: discord.Interaction, member: Optional[discord.Me
 
 
 #Command ~ 2 ~ Spotify track currently listening to
-# It's not dat hard...
+# It's not dat hard... Don't say anything! 😶‍🌫️
 @client.tree.command()
 async def track(interaction: discord.Interaction, member: Optional[discord.Member] = None):
 
