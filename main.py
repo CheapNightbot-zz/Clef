@@ -136,7 +136,7 @@ async def activity(interaction: discord.Interaction, member: Optional[discord.Me
         ac_limg = [] # Activity large image
         ac_st = [] # Activity status
         ac_dt = [] # Activity details
-        g_type = [] # Activity type
+        ac_type = [] # Activity type
 
         # If user have added a game manually as activity
         # then `member.activity.name` is "Game name" instead
@@ -160,9 +160,9 @@ async def activity(interaction: discord.Interaction, member: Optional[discord.Me
             ac_dt = da_activity.details
 
         if "Game name" in str(da_activity.to_dict):
-            g_type = "Playing"
+            ac_type = "Playing"
         else:
-            g_type = da_activity.type.name.capitalize()
+            ac_type = da_activity.type.name.capitalize()
 
         # Getting activity timestamp & storing it in
         # an empty list "stamp".
@@ -197,7 +197,7 @@ async def activity(interaction: discord.Interaction, member: Optional[discord.Me
             stamp = "Couldn't get!"
 
         # Embed for "Playing" type activity (basically for games).
-        embed = discord.Embed(title="", description=f"{g_type} {doin_type} **{da_activity.name}**")
+        embed = discord.Embed(title="", description=f"{ac_type} {doin_type} **{da_activity.name}**")
         embed.set_author(name=f'{member.display_name}', icon_url=status)
         embed.set_thumbnail(url=f"{ac_limg}")
         embed.add_field(name="State:", value=f"{ac_st}", inline=False)
