@@ -3,7 +3,10 @@ from typing import Optional
 
 from dotenv import load_dotenv
 load_dotenv()
+
 import dateutil.parser
+import json
+import requests
 
 import discord
 from discord import app_commands
@@ -258,6 +261,7 @@ async def activity(interaction: discord.Interaction, member: Optional[discord.Me
 #Command ~ 2 ~ Spotify track currently listening to
 # It's not dat hard... Don't say anything! 😶‍🌫️
 @client.tree.command()
+@app_commands.describe(member="The member you want to get the track from; defaults to the user who uses the command")
 async def track(interaction: discord.Interaction, member: Optional[discord.Member] = None):
 
     """Show information about currently listening track on Spotify"""
@@ -286,11 +290,49 @@ async def track(interaction: discord.Interaction, member: Optional[discord.Membe
 
 #Command ~ 3 ~ Lyrics?
 @client.tree.command()
-async def lyrics(interaction: discord.Interaction):
+@app_commands.describe(member="The member you want to get the track from; defaults to the user who uses the command")
+async def lyrics(interaction: discord.Interaction, member: Optional[discord.Member] = None):
 
-    """Get lyrics of any song [CURRENTLY NOT AVAILABLE]"""
+    """Get lyrics of Currently playing song on Spotify"""
+    user = member or interaction.user
+    member = user.guild.get_member(user.id)
+    spotify_result = next((activity for activity in member.activities if isinstance(activity, discord.Spotify)), None)
+    
+    if spotify_result is None:
+            if member == interaction.user:
+                await interaction.response.send_message(f'You are not even listening to Spotify! <:happycheems:980237883527008298>')
+                return
+            else:
+                await interaction.response.send_message(f'**{member.display_name}** is not listening to Spotify! <:uhm:981696092179660801>')
+                return
 
-    await interaction.response.send_message("**__CURRENTLY NOT AVAILABLE__**")
+    aname = spotify_result.artist # Artist Name
+    sname = spotify_result.title # Song Name
+
+    url = 'https://the-lyrics-api.herokuapp.com/lyrics'
+    header = {"Content-Type": "application/json"}
+    data_raw = {"artist": f"{aname}","song": f"{sname}","lang": "eng"}
+
+    response = requests.get(url=url, headers=header, json=data_raw) # Fetching lyrics from api.
+    lyrics_raw = response.json() # Converting fetched lyrics/data into JSON file.
+
+    # Removing "[]" from data & getting key name(s) in data from JSON file.
+    # Checking if key name is "lyrics" or "detail" for error.
+    # If we don't check this, sometimes we get error as key name
+    # is not always "lyrics", it can be "detail" if no lyrics were found.
+    keyname = list(lyrics_raw.keys())[0]
+    if keyname == "lyrics":
+        lyrics = lyrics_raw[f'{keyname}'] # Getting the value of choosen key name (in this case "lyrics").
+
+    elif keyname == "detail":
+        lyrics = lyrics_raw[f'{keyname}'] # Getting the value of choosen key name (in this case "detail").
+
+    embed = discord.Embed(title=f'{spotify_result.title}', description=f"{lyrics}", url=f'https://open.spotify.com/track/{spotify_result.track_id}', color=spotify_result.color)
+    embed.set_thumbnail(url=f"{spotify_result.album_cover_url}")
+    embed.set_author(name=f'Lyrics of currently playing song:')
+    embed.set_footer(text=f"Duration: {dateutil.parser.parse(str(spotify_result.duration)).strftime('%M:%S')}", icon_url="https://i.ibb.co/R3qNYqc/spotify-logo-PNG3.png")
+
+    await interaction.response.send_message(embed=embed)
 
 
 client.run(TOKEN)
