@@ -184,7 +184,7 @@ async def activity(interaction: discord.Interaction, member: Optional[discord.Me
                 # returns activity start time in epochs, but with
                 # extra 3 number in the end. So simply I'm storing
                 # `activity._start` value in `stamp_raw` and than removing
-                # last three number from it than adding the `stamp_raw` into
+                # last three number from it than adding the `stamp_raw`
                 # value into Discord's Timestamp format for "Relative Time".
                 # makes sense?
                 if int(da_activity._start) != 0:
