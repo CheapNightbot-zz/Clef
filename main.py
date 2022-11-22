@@ -169,7 +169,7 @@ async def activity(interaction: discord.Interaction, member: Optional[discord.Me
         stamp = []
 
         # Not all acitivies will have start time and
-        # it's gives error and breaks whole code,
+        # it gives error and breaks whole code,
         # that's why doing `try - except` to pass any error
         # by just setting "stamp" value to "Couldn't get!"
         try:
