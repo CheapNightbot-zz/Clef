@@ -15,10 +15,10 @@ class MyClient(discord.Client):
         super().__init__(intents=intents)
         self.tree = app_commands.CommandTree(self)
 
-    async def setup_hook(self) -> None:
+    # async def setup_hook(self) -> None:
 
-        await self.tree.sync()
-        print("Slash commands synced!")
+    #     await self.tree.sync()
+    #     print("Slash commands synced!")
 
 intents = discord.Intents.default()
 intents.members = True
@@ -42,30 +42,36 @@ async def ping(interaction: discord.Interaction):
 
 #Command ~ 3 ~ Activity
 @client.tree.command()
+@app_commands.describe(member="The member you want to get the activity of; defaults to the user who uses the command")
 async def activity(interaction: discord.Interaction, member: Optional[discord.Member] = None):
 
-    """See wat a member doin"""
+    """See wat a member doin 👀"""
     user = member or interaction.user
     member = user.guild.get_member(user.id)
     da_activity = next((activity for activity in member.activities), None)
 
-    status = []
+    # Checking for user status (online, idle, etc...) and
+    # storing relevant image to empty list called `status`.
+    status = [] # Empty list of user status
   
     if str(member.status) == "online":
-        status = "https://cdn.discordapp.com/emojis/1008781589871874118.webp?size=44&quality=lossless"  #<:online:1008781589871874118>
+        status = "https://cdn.discordapp.com/emojis/1008781589871874118.webp?size=44&quality=lossless"
       
     elif str(member.status) == "idle":
-        status = "https://cdn.discordapp.com/emojis/1008782182308909058.webp?size=96&quality=lossless"  #<:idle:1008782182308909058>
+        status = "https://cdn.discordapp.com/emojis/1008782182308909058.webp?size=96&quality=lossless"
       
     elif str(member.status) == "dnd":
-        status = "https://cdn.discordapp.com/emojis/1008783135208644650.webp?size=96&quality=lossless"  #<:dnd:1008783135208644650>
+        status = "https://cdn.discordapp.com/emojis/1008783135208644650.webp?size=96&quality=lossless"
       
     elif str(member.status) == "offline":
-        status = "https://cdn.discordapp.com/emojis/1008784847306768484.webp?size=96&quality=lossless"  #<:invisible:1008784847306768484>
+        status = "https://cdn.discordapp.com/emojis/1008784847306768484.webp?size=96&quality=lossless"
 
     else:
-        status = "https://cdn.discordapp.com/emojis/1008830876534190170.webp?size=96&quality=lossless"  #<:streaming:1008830876534190170>
+        status = "https://cdn.discordapp.com/emojis/1008830876534190170.webp?size=96&quality=lossless"
 
+    # If user/member is not doing any activity,
+    # then the following `if` statement will execute
+    # otherwise it will be skipped.
     if da_activity is None:
 
         embed1 = discord.Embed(
@@ -82,6 +88,8 @@ async def activity(interaction: discord.Interaction, member: Optional[discord.Me
         )
         embed2.set_author(name=f'{member.display_name}', icon_url=status)
 
+        # Checking if member requested activity for themselves
+        # or for another member, then send respectivily `embed1` and `embed2`
         if member == interaction.user:
             await interaction.response.send_message(embed=embed1)
             return
@@ -89,25 +97,51 @@ async def activity(interaction: discord.Interaction, member: Optional[discord.Me
             await interaction.response.send_message(embed=embed2)
             return
 
-    doin = []
-    if da_activity.type.value == 2:
-        doin = "to"
-    elif da_activity.type.value == 4:
+    # Just comparing the activity type to add suffix to activity type in embed:
+    # For example; if `activity.type.value == 2` (which means "Listening"
+    # - see the Discord documentation: https://discord.com/developers/docs/game-sdk/activities#data-models-activitytype-enum)
+    # then `doin_type` will be "to" & it will send "Listening to"
+    doin_type = []
+
+    # If acitivity type is "Listening", then
+    # set `doin_type` value to "to".
+    if da_activity.type.value == 2: # Listening
+        doin_type = "to"
+
+    # If acitivity type is "Custom", then
+    # set `doin_type` value to "status/doin + [status_emoji]".
+    elif da_activity.type.value == 4: # Custom
+
         if str(da_activity.emoji) == "None":
-            doin = f"status/doin"
+            doin_type = f"status/doin"
         else:
-            doin = f"status/doin **{da_activity.emoji}**"
-    elif da_activity.type.value == 5:
-        doin = "on"
+            doin_type = f"status/doin **{da_activity.emoji}**"
+
+    # If acitivity type is "Competing", then
+    # set `doin_type` value to "on".
+    elif da_activity.type.value == 5: # Competing
+        doin_type = "on"
+
+    # If nothing is true above, then set `doin_type`
+    # value to "~".
     else:
-        doin = "~"
+        doin_type = "~"
 
+    # If acitivity type is "Playing", then
+    # get activity details, status, large image, type
+    # and store in empty lists.
     if str(da_activity.type.name) == "playing":
-        ac_limg = []
-        ac_st = []
-        ac_dt = []
-        g_type = []
+        ac_limg = [] # Activity large image
+        ac_st = [] # Activity status
+        ac_dt = [] # Activity details
+        g_type = [] # Activity type
 
+        # If user have added a game manually as activity
+        # then `member.activity.name` is "Game name" instead
+        # of just "name". So, we checking if `member.activity.to_dict`
+        # contains "Game name", then probably it will not have large image,
+        # so just use the default image provided here, else get large image
+        # using `member.activity.large_image_url`. Same for details, etc. (makes sense?)
         if "Game name" in str(da_activity.to_dict):
             ac_limg = "https://i.ibb.co/jbGRZrM/app-image.png"
         else:
@@ -128,78 +162,99 @@ async def activity(interaction: discord.Interaction, member: Optional[discord.Me
         else:
             g_type = da_activity.type.name.capitalize()
 
+        # Getting activity timestamp & storing it in
+        # an empty list "stamp".
         stamp = []
-        if str(da_activity.start) == "None":
-            stamp = "Couldn't get!"
-        
-        else:
-            if int(da_activity._start) != 0:
-                stamp_raw = f"{da_activity._start}"
-                stamp_ra = stamp_raw[:-3]
-                stamp = f"Started <t:{stamp_ra}:R>"
-            else:
-                stamp = "Couldn't get!"
 
-        embed = discord.Embed(title="", description=f"{g_type} {doin} **{da_activity.name}**")
+        # Not all acitivies will have start time and
+        # it's gives error and breaks whole code,
+        # that's why doing `try - except` to pass any error
+        # by just setting "stamp" value to "Couldn't get!"
+        try:
+            if str(da_activity.start) == "None":
+                stamp = "Couldn't get!"
+            
+            else:
+                # This one is like hack for me, I don't really
+                # know WHY! Idk, but I tried getting timestamp
+                # using `activity.start`, but it returns "None".
+                # So, instead I used `activity._start`; which technically
+                # returns activity start time in epochs, but with
+                # extra 3 number in the end. So simply I'm storing
+                # `activity._start` value in `stamp_raw` and than removing
+                # last three number from it than adding the `stamp_raw` into
+                # value into Discord's Timestamp format for "Relative Time".
+                # makes sense?
+                if int(da_activity._start) != 0:
+                    stamp_raw = f"{da_activity._start}"
+                    stamp_ra = stamp_raw[:-3]
+                    stamp = f"Started <t:{stamp_ra}:R>"
+                else:
+                    stamp = "Couldn't get!"
+        except:
+            stamp = "Couldn't get!"
+
+        # Embed for "Playing" type activity (basically for games).
+        embed = discord.Embed(title="", description=f"{g_type} {doin_type} **{da_activity.name}**")
         embed.set_author(name=f'{member.display_name}', icon_url=status)
         embed.set_thumbnail(url=f"{ac_limg}")
         embed.add_field(name="State:", value=f"{ac_st}", inline=False)
         embed.add_field(name="Details:", value=f"{ac_dt}", inline=False)
         embed.add_field(name="Timestamp:", value=f"{stamp}")
 
+    # If acitivity type is "Streaming", then
+    # get activity details; platform, videoID (youtube only)
+    # and store in empty lists.
     elif str(da_activity.type.name) == "streaming":
         platform = []
         videoID = []
         if "youtube" in str({da_activity.url}):
-            platform = "YouTube"  #<:YouTube:1009145866197680159>
+            platform = "YouTube"
             url = da_activity.url
-            videoID = url.split("watch?v=")[1].split("&")[0]
+            videoID = url.split("watch?v=")[1].split("&")[0] # spliting url to get video id, idk Google it xD
         else:
-            platform = "Twitch"  #<:Twitch:1009145863429435522>
-        embed = discord.Embed(
-            title="",
-            description=
-            f"{da_activity.type.name.capitalize()} {doin} [**{da_activity.name}**]({da_activity.url})"
-        )
+            platform = "Twitch"
+
+        # Embed for "Streaming" type activity.
+        embed = discord.Embed(title="", description = f"{da_activity.type.name.capitalize()} {doin_type} [**{da_activity.name}**]({da_activity.url})")
         embed.set_author(name=f'{member.display_name}', icon_url=status)
         embed.add_field(name="Platform:", value=f"{platform} - <:YouTube:1009145866197680159>", inline=False)
         embed.add_field(name="Details:", value=f"{da_activity.details}", inline=False)
         embed.set_image(url=f"https://img.youtube.com/vi/{videoID}/maxresdefault.jpg".format(videoID=videoID))
 
+    # If acitivity type is "Listening", then
+    # get activity details; song url, album art
+    # and store in empty lists.
     elif str(da_activity.type.name) == "listening":
         songurl = []
         thumb = []
+
+        # Please don't ask anything...
         if str(da_activity.name) == "Spotify":
             songurl = f"https://open.spotify.com/track/{da_activity.track_id}"
             thumb = "https://cdn-icons.flaticon.com/png/512/2585/premium/2585161.png?token=exp=1661109514~hmac=0e40686fc50875d90b3e5d4edaf4d271"
         else:
             songurl = da_activity.url
             thumb = da_activity.large_image_url
-        embed = discord.Embed(
-            title="",
-            description=
-            f"{da_activity.type.name.capitalize()} {doin} **{da_activity.name}**"
-        )
+        
+        # Embed for "Listening" type activity.
+        embed = discord.Embed(title="", description=f"{da_activity.type.name.capitalize()} {doin_type} **{da_activity.name}**")
         embed.set_author(name=f'{member.display_name}', icon_url=status)
-        embed.add_field(
-            name="Details:",
-            value=
-            f"[{da_activity._details}]({songurl}) by {da_activity._state}",
-            inline=False)
+        embed.add_field(name="Details:", value=f"[{da_activity._details}]({songurl}) by {da_activity._state}", inline=False)
         embed.set_thumbnail(url=f"{thumb}")
 
+    # If user/member is not doing any activity,
+    # then there can a custom status, so this will
+    # send that with emoji (if there's any).
     else:
-        embed = discord.Embed(
-            title="",
-            description=
-            f"{da_activity.type.name.capitalize()} {doin} **{da_activity.name}**"
-        )
+        embed = discord.Embed(title="", description=f"{da_activity.type.name.capitalize()} {doin_type} **{da_activity.name}**")
         embed.set_author(name=f'{member.display_name}', icon_url=status)
 
-    await interaction.response.send_message(embed=embed)
+    await interaction.response.send_message(embed=embed) # finally sending embed(s).
 
 
 #Command ~ 4 ~ Spotify track currently listening to
+# It's not dat hard...
 @client.tree.command()
 async def track(interaction: discord.Interaction, member: Optional[discord.Member] = None):
 
@@ -220,21 +275,18 @@ async def track(interaction: discord.Interaction, member: Optional[discord.Membe
         title=f'{spotify_result.title}',
         description="",
         url=f'https://open.spotify.com/track/{spotify_result.track_id}',
-        color=spotify_result.color
-    )
+        color=spotify_result.color)
 
     embed.set_image(url=f"{spotify_result.album_cover_url}")
     # embed.set_thumbnail(url="https://i.ibb.co/R3qNYqc/spotify-logo-PNG3.png")
     embed.add_field(
         name="**Artist(s):**",
         value=f'{", ".join(spotify_result.artists)}',
-        inline=False
-    )
+        inline=False)
     embed.add_field(
         name="**Album:**",
         value=f'{spotify_result.album}',
-        inline=False
-    )
+        inline=False)
     embed.set_author(name=f'{member.display_name} is currently listening to:')
     embed.set_footer(text=f"Duration: {dateutil.parser.parse(str(spotify_result.duration)).strftime('%M:%S')}", icon_url="https://i.ibb.co/R3qNYqc/spotify-logo-PNG3.png")
 
