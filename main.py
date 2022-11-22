@@ -79,7 +79,7 @@ async def activity(interaction: discord.Interaction, member: Optional[discord.Me
         embed1 = discord.Embed(
             title="",
             description=
-            f'You are not doin anything... *__stap it, get some help!__* <:what_1:885289872032694353>'
+            f'You are not doin anything... *__stap it, get some help!__* <:happycheems:980237883527008298>'
         )
         embed1.set_author(name=f'{member.display_name}', icon_url=status)
 
@@ -267,7 +267,7 @@ async def track(interaction: discord.Interaction, member: Optional[discord.Membe
     
     if spotify_result is None:
             if member == interaction.user:
-                await interaction.response.send_message(f'You are not even listening to Spotify! <:what_1:885289872032694353>')
+                await interaction.response.send_message(f'You are not even listening to Spotify! <:happycheems:980237883527008298>')
                 return
             else:
                 await interaction.response.send_message(f'**{member.display_name}** is not listening to Spotify! <:uhm:981696092179660801>')
