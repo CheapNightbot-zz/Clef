@@ -15,6 +15,8 @@ class MyClient(discord.Client):
         super().__init__(intents=intents)
         self.tree = app_commands.CommandTree(self)
 
+    # Don't need to sync command everytime.
+    # Use when you make changes to slash command itself.
     # async def setup_hook(self) -> None:
 
     #     await self.tree.sync()
@@ -25,13 +27,13 @@ intents.members = True
 intents.presences = True
 client = MyClient(intents = intents)
 
-# Even ~ 1 ~ on_ready
+# Event ~ 0 ~ on_ready
 @client.event
 async def on_ready():
     print('Bot is ready')
 
 
-#Command ~ 1 ~ Ping
+#Command ~ 0 ~ Ping
 @client.tree.command()
 async def ping(interaction: discord.Interaction):
 
@@ -40,7 +42,7 @@ async def ping(interaction: discord.Interaction):
     await interaction.response.send_message(f"> Pong! (**Response Time** = {round(client.latency * 1000)}ms)")
 
 
-#Command ~ 3 ~ Activity
+#Command ~ 1 ~ Activity
 @client.tree.command()
 @app_commands.describe(member="The member you want to get the activity of; defaults to the user who uses the command")
 async def activity(interaction: discord.Interaction, member: Optional[discord.Member] = None):
@@ -253,7 +255,7 @@ async def activity(interaction: discord.Interaction, member: Optional[discord.Me
     await interaction.response.send_message(embed=embed) # finally sending embed(s).
 
 
-#Command ~ 4 ~ Spotify track currently listening to
+#Command ~ 2 ~ Spotify track currently listening to
 # It's not dat hard...
 @client.tree.command()
 async def track(interaction: discord.Interaction, member: Optional[discord.Member] = None):
@@ -293,7 +295,7 @@ async def track(interaction: discord.Interaction, member: Optional[discord.Membe
     await interaction.response.send_message(embed=embed)
 
 
-#Command ~ 5 ~ Lyrics?
+#Command ~ 3 ~ Lyrics?
 @client.tree.command()
 async def lyrics(interaction: discord.Interaction):
 
