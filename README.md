@@ -1,4 +1,4 @@
-# Clef <img src="resources/Clef Logo.png" width="69" height="69"/>
+# Clef <img src="resources/Clef Logo.png" alt="Clef Logo © 2022 CheapNightbot" title="Clef Logo © 2022 CheapNightbot" width="69" height="69"/>
 
  Clef ♪ ~ a simple discord bot to lurk around on server members and do other cool stuffs.
 
