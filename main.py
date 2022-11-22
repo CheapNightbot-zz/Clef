@@ -273,22 +273,11 @@ async def track(interaction: discord.Interaction, member: Optional[discord.Membe
                 await interaction.response.send_message(f'**{member.display_name}** is not listening to Spotify! <:uhm:981696092179660801>')
                 return
 
-    embed = discord.Embed(
-        title=f'{spotify_result.title}',
-        description="",
-        url=f'https://open.spotify.com/track/{spotify_result.track_id}',
-        color=spotify_result.color)
-
+    embed = discord.Embed(title=f'{spotify_result.title}', description="", url=f'https://open.spotify.com/track/{spotify_result.track_id}', color=spotify_result.color)
     embed.set_image(url=f"{spotify_result.album_cover_url}")
     # embed.set_thumbnail(url="https://i.ibb.co/R3qNYqc/spotify-logo-PNG3.png")
-    embed.add_field(
-        name="**Artist(s):**",
-        value=f'{", ".join(spotify_result.artists)}',
-        inline=False)
-    embed.add_field(
-        name="**Album:**",
-        value=f'{spotify_result.album}',
-        inline=False)
+    embed.add_field(name="**Artist(s):**", value=f'{", ".join(spotify_result.artists)}', inline=False)
+    embed.add_field(name="**Album:**", value=f'{spotify_result.album}', inline=False)
     embed.set_author(name=f'{member.display_name} is currently listening to:')
     embed.set_footer(text=f"Duration: {dateutil.parser.parse(str(spotify_result.duration)).strftime('%M:%S')}", icon_url="https://i.ibb.co/R3qNYqc/spotify-logo-PNG3.png")
 
