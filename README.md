@@ -6,6 +6,8 @@
 
 - [x] Get information about currently playing song on Spotify by yourself or any server member.
 
+<img src="resources\Clef - Track Command.gif" width="500" height="300"/>
+
 - [x] Get any activity information by yourself or by server member.
 
 <img src="resources/Clef - Activity Command.gif" width="500" height="300"/>
