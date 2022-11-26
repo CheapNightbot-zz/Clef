@@ -237,7 +237,7 @@ async def activity(interaction: discord.Interaction, member: Optional[discord.Me
         # Please don't ask anything... 😶‍🌫️
         if str(da_activity.name) == "Spotify":
             songurl = f"https://open.spotify.com/track/{da_activity.track_id}"
-            thumb = "https://cdn-icons.flaticon.com/png/512/2585/premium/2585161.png?token=exp=1661109514~hmac=0e40686fc50875d90b3e5d4edaf4d271"
+            thumb = f"{da_activity.album_cover_url}"
         else:
             songurl = da_activity.url
             thumb = da_activity.large_image_url
