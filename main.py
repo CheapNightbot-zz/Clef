@@ -149,22 +149,13 @@ async def activity(interaction: discord.Interaction, member: Optional[discord.Me
         # using `member.activity.large_image_url`. Same for details, etc. (makes sense?)
         if "Game name" in str(da_activity.to_dict):
             ac_limg = "https://i.ibb.co/jbGRZrM/app-image.png"
-        else:
-            ac_limg = da_activity.large_image_url
-
-        if "Game name" in str(da_activity.to_dict):
             ac_st = "None / Couldn't get!"
-        else:
-            ac_st = da_activity.state
-
-        if "Game name" in str(da_activity.to_dict):
             ac_dt = "None / Couldn't get!"
-        else:
-            ac_dt = da_activity.details
-
-        if "Game name" in str(da_activity.to_dict):
             ac_type = "Playing"
         else:
+            ac_limg = da_activity.large_image_url
+            ac_st = da_activity.state
+            ac_dt = da_activity.details
             ac_type = da_activity.type.name.capitalize()
 
         # Getting activity timestamp & storing it in
@@ -249,7 +240,7 @@ async def activity(interaction: discord.Interaction, member: Optional[discord.Me
         embed.set_thumbnail(url=f"{thumb}")
 
     # If user/member is not doing any activity,
-    # then there can a custom status, so this will
+    # then there can be a custom status, so this will
     # send that with emoji (if there's any).
     else:
         embed = discord.Embed(title="", description=f"{da_activity.type.name.capitalize()} {doin_type} **{da_activity.name}**")
@@ -259,7 +250,7 @@ async def activity(interaction: discord.Interaction, member: Optional[discord.Me
 
 
 #Command ~ 2 ~ Spotify track currently listening to
-# It's not dat hard... Don't say anything! 😶‍🌫️
+# It's not dat hard... Don't say anything! 😶
 @client.tree.command()
 @app_commands.describe(member="The member you want to get the track from; defaults to the user who uses the command")
 async def track(interaction: discord.Interaction, member: Optional[discord.Member] = None):
@@ -290,10 +281,11 @@ async def track(interaction: discord.Interaction, member: Optional[discord.Membe
 
 #Command ~ 3 ~ Lyrics?
 @client.tree.command()
+@app_commands.checks.cooldown(1, 120, key=lambda i: (i.guild_id)) # cooldown
 @app_commands.describe(member="The member you want to get the track from; defaults to the user who uses the command")
 async def lyrics(interaction: discord.Interaction, member: Optional[discord.Member] = None):
 
-    """Get lyrics of Currently playing song on Spotify"""
+    """Get lyrics of Currently playing song on Spotify (1 lyrics every 2 minutes)"""
     user = member or interaction.user
     member = user.guild.get_member(user.id)
     spotify_result = next((activity for activity in member.activities if isinstance(activity, discord.Spotify)), None)
@@ -306,33 +298,37 @@ async def lyrics(interaction: discord.Interaction, member: Optional[discord.Memb
                 await interaction.response.send_message(f'**{member.display_name}** is not listening to Spotify! <:uhm:981696092179660801>')
                 return
 
-    aname = spotify_result.artist # Artist Name
-    sname = spotify_result.title # Song Name
+    Track = spotify_result.title # Song Name
+    Artist = spotify_result.artist # Artist Name
 
-    url = 'https://the-lyrics-api.herokuapp.com/lyrics'
-    header = {"Content-Type": "application/json"}
-    data_raw = {"artist": f"{aname}","song": f"{sname}","lang": "eng"}
-
-    response = requests.get(url=url, headers=header, json=data_raw) # Fetching lyrics from api.
+    # Thanks to this guy on GitHub for simple API: https://github.com/asrvd
+    # API GitHub page: https://github.com/asrvd/lyrist
+    response = requests.get(f"https://lyrist.vercel.app/api/:{Track}/:{Artist}") # Fetching lyrics from api.
     lyrics_raw = response.json() # Converting fetched lyrics/data into JSON file.
 
-    # Removing "[]" from data & getting key name(s) in data from JSON file.
-    # Checking if key name is "lyrics" or "detail" for error.
-    # If we don't check this, sometimes we get error as key name
-    # is not always "lyrics", it can be "detail" if no lyrics were found.
-    keyname = list(lyrics_raw.keys())[0]
-    if keyname == "lyrics":
-        lyrics = lyrics_raw[f'{keyname}'] # Getting the value of choosen key name (in this case "lyrics").
+    # Creating list of all keynames from "lyrics_raw"
+    # json file than checking if certain keynames exists
+    # in that list.
+    keyname = list(lyrics_raw.keys())
+    if "lyrics" in keyname:
+        lyrics = lyrics_raw['lyrics'] # Getting the value of choosen key name (in this case "lyrics").
+        source = lyrics_raw['source']
 
-    elif keyname == "detail":
-        lyrics = lyrics_raw[f'{keyname}'] # Getting the value of choosen key name (in this case "detail").
+    elif "error" in keyname:
+        lyrics = lyrics_raw['error'] # Getting the value of choosen key name (in this case "error").
 
     embed = discord.Embed(title=f'{spotify_result.title}', description=f"{lyrics}", url=f'https://open.spotify.com/track/{spotify_result.track_id}', color=spotify_result.color)
     embed.set_thumbnail(url=f"{spotify_result.album_cover_url}")
     embed.set_author(name=f'Lyrics of currently playing song:')
-    embed.set_footer(text=f"Duration: {dateutil.parser.parse(str(spotify_result.duration)).strftime('%M:%S')}", icon_url="https://i.ibb.co/R3qNYqc/spotify-logo-PNG3.png")
+    embed.set_footer(text=f"Source: {source}", icon_url="https://i.ibb.co/R3qNYqc/spotify-logo-PNG3.png")
 
     await interaction.response.send_message(embed=embed)
 
+# Lyrics command on cooldown error handler
+@lyrics.error
+async def on_test_error(interaction: discord.Interaction, error: app_commands.AppCommandError):
+    if isinstance(error, app_commands.CommandOnCooldown):
+        custom_error = str(error).replace("You are", "This command is")
+        await interaction.response.send_message(str(custom_error), ephemeral=True)
 
 client.run(TOKEN)
