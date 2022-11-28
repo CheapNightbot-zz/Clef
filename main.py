@@ -225,7 +225,7 @@ async def activity(interaction: discord.Interaction, member: Optional[discord.Me
         songurl = []
         thumb = []
 
-        # Please don't ask anything... 😶‍🌫️
+        # Please don't ask anything... 😳
         if str(da_activity.name) == "Spotify":
             songurl = f"https://open.spotify.com/track/{da_activity.track_id}"
             thumb = f"{da_activity.album_cover_url}"
