@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import dateutil.parser
+import aiohttp
 import json
-import requests
 
 import discord
 from discord import app_commands
@@ -281,11 +281,11 @@ async def track(interaction: discord.Interaction, member: Optional[discord.Membe
 
 #Command ~ 3 ~ Lyrics?
 @client.tree.command()
-@app_commands.checks.cooldown(1, 120, key=lambda i: (i.guild_id)) # cooldown
+@app_commands.checks.cooldown(1, 120, key=lambda i: (i.guild_id)) # cooldown to prevent api abuse
 @app_commands.describe(member="The member you want to get the track from; defaults to the user who uses the command")
 async def lyrics(interaction: discord.Interaction, member: Optional[discord.Member] = None):
 
-    """Get lyrics of Currently playing song on Spotify (1 lyrics every 2 minutes)"""
+    """Get lyrics of Currently playing song on Spotify (1 lyrics every 2 minutes to prevent api abuse)"""
     user = member or interaction.user
     member = user.guild.get_member(user.id)
     spotify_result = next((activity for activity in member.activities if isinstance(activity, discord.Spotify)), None)
@@ -303,8 +303,10 @@ async def lyrics(interaction: discord.Interaction, member: Optional[discord.Memb
 
     # Thanks to this guy on GitHub for simple API: https://github.com/asrvd
     # API GitHub page: https://github.com/asrvd/lyrist
-    response = requests.get(f"https://lyrist.vercel.app/api/:{Track}/:{Artist}") # Fetching lyrics from api.
-    lyrics_raw = response.json() # Converting fetched lyrics/data into JSON file.
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f"https://lyrist.vercel.app/api/:{Track}/:{Artist}") as response: # Fetching lyrics from api.
+            lyrics_raw = await response.json() # Converting fetched lyrics/data into JSON file.
+
 
     # Creating list of all keynames from "lyrics_raw"
     # json file than checking if certain keynames exists
