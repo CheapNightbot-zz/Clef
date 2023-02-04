@@ -8,7 +8,7 @@
 
 - [x] Get information about currently playing song on Spotify by yourself or any server member.
 
-![Clef - Track Command](resources/track_command.gif?raw=true)
+![Clef - Track Command](resources/track_command.gif)
 
 - [x] Get any activity information by yourself or by server member.
 
