@@ -16,4 +16,4 @@
 
 - [x] Get lyrics of currently playing song on Spotify.
 
-    too lazy to record a gif... 〜(￣▽￣〜)
+![Clef - Activity Command](resources/lyrics_command.gif)

@@ -316,13 +316,17 @@ async def lyrics(interaction: discord.Interaction, member: Optional[discord.Memb
         lyrics = lyrics_raw['lyrics'] # Getting the value of choosen key name (in this case "lyrics").
         source = lyrics_raw['source']
 
-    elif "error" in keyname:
-        lyrics = lyrics_raw['error'] # Getting the value of choosen key name (in this case "error").
+        embed = discord.Embed(title=f'{spotify_result.title}', description=f"{lyrics}", url=f'https://open.spotify.com/track/{spotify_result.track_id}', color=spotify_result.color)
+        embed.set_thumbnail(url=f"{spotify_result.album_cover_url}")
+        embed.set_author(name=f'Lyrics of currently playing song:')
+        embed.set_footer(text=f"Source: {source}", icon_url="https://i.ibb.co/R3qNYqc/spotify-logo-PNG3.png")
 
-    embed = discord.Embed(title=f'{spotify_result.title}', description=f"{lyrics}", url=f'https://open.spotify.com/track/{spotify_result.track_id}', color=spotify_result.color)
-    embed.set_thumbnail(url=f"{spotify_result.album_cover_url}")
-    embed.set_author(name=f'Lyrics of currently playing song:')
-    embed.set_footer(text=f"Source: {source}", icon_url="https://i.ibb.co/R3qNYqc/spotify-logo-PNG3.png")
+    else:
+        lyrics = lyrics_raw['error'] # Getting the value of choosen key name (in this case "error").
+    
+        embed = discord.Embed(title=f'{spotify_result.title}', description=f"Sorry, {lyrics}!", url=f'https://open.spotify.com/track/{spotify_result.track_id}', color=spotify_result.color)
+        embed.set_thumbnail(url=f"{spotify_result.album_cover_url}")
+        embed.set_author(name=f'Lyrics of currently playing song:')
 
     await interaction.response.send_message(embed=embed)
 
